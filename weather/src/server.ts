@@ -1,7 +1,12 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "./app-data-source";
 import { regionSearchValidator } from "./middleware/regionSearchValidator";
-import { searchRegion } from "./service/region";
+import {
+  searchRegion,
+  getSimilarRegion,
+  recommendRegion,
+  getChildRegion,
+} from "./service/region";
 
 const app = express();
 app.use(express.json());
@@ -24,6 +29,41 @@ app.get(
         result[1] !== ""
           ? `예외 항목은 ${result[1].slice(0, -2)}입니다`
           : "예외 항목은 없습니다",
+    });
+  }
+);
+
+app.get(
+  "/similar-region",
+  regionSearchValidator,
+  async function (req: Request, res: Response) {
+    const data: string = req.query.data as string;
+    const result = await getSimilarRegion(data);
+
+    res.send({
+      data: result,
+      message: "성공",
+    });
+  }
+);
+
+app.get("/recommend-region", async function (req: Request, res: Response) {
+  const result = await recommendRegion();
+  res.send({
+    data: result,
+    message: "성공",
+  });
+});
+
+app.get(
+  "/get-child-region",
+  regionSearchValidator,
+  async function (req: Request, res: Response) {
+    const data: string = req.query.data as string;
+    const result = await getChildRegion(data);
+    res.send({
+      data: result,
+      message: result.length > 0 ? "성공" : "마지막입니다",
     });
   }
 );

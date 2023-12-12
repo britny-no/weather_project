@@ -17,7 +17,7 @@ export class SearchHistoryEntity {
   search_history_index: string;
 
   @Column({ type: "varchar", length: 100 })
-  keyword: string;
+  name: string;
 
   @Column({ type: "int" })
   user_index: number;
