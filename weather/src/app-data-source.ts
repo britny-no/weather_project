@@ -2,7 +2,7 @@ import { DataSource } from "typeorm";
 
 require("dotenv").config();
 
-const { DB_HOST, DB_PORT, DB_USER, DB_PW, DB_DB } = process.env;
+const { DB_HOST, DB_PORT, DB_USER, DB_PW, DB_DB, NODE_ENV } = process.env;
 
 export const AppDataSource = new DataSource({
   type: "mysql",
@@ -11,7 +11,9 @@ export const AppDataSource = new DataSource({
   username: DB_USER,
   password: DB_PW,
   database: DB_DB,
-  entities: ["src/entity/*.entity.ts"],
+  entities: [
+    NODE_ENV === "dev" ? "src/entity/*.entity.ts" : "dist/entity/*.entity.js",
+  ],
   // logging: true,
   // synchronize: true,
 });

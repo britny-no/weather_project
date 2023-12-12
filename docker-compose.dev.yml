@@ -12,6 +12,7 @@ services:
       - docker.env
     environment:
       TZ: Asia/Seoul
+      VERSION: DEV
     volumes:
       - mysql:/var/lib/mysql
     # command: --default-authentication-plugin=mysql_native_password
@@ -21,7 +22,7 @@ services:
       - db
     build:
       context: ./weather
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: node-app
     restart: always
     ports:
@@ -29,6 +30,13 @@ services:
     volumes:
       - ./weather:/weather
       - /weather/node_modules/
+
+    command:
+      - bash
+      - -c
+      - |
+        /weather/wait-for-it.sh appsDB:3306 -t 10
+        npm run dev
 
   phpmyadmin:
     depends_on:

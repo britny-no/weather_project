@@ -14,6 +14,7 @@ services:
       - docker.env
     environment:
       TZ: Asia/Seoul
+      VERSION: PROD
     volumes:
       - mysql:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
@@ -33,6 +34,12 @@ services:
     volumes:
       - ./weather:/weather
       - /weather/node_modules/
+    command:
+      - bash
+      - -c
+      - |
+        /weather/wait-for-it.sh appsDB:3306 -t 10
+        npm run start
 volumes:
   mysql:
 networks:
