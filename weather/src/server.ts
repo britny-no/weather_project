@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { myDataSource } from "./app-data-source";
+import { topDownOb, bottomUpOb } from "./constant/ob";
 // create and setup express app
 const app = express();
 app.use(express.json());
@@ -8,88 +9,93 @@ app.use(express.json());
 
 // depth1,2,3으로 표현하고
 // linked array로 부모자식 관계?
-const depth1 = ["서울", "경기", "경상", "경상남도", "경상북도"];
-const depth2 = [
-  "관악구",
-  "강남구",
-  "용산구",
-  "수원시",
-  "장안구",
-  "권선구",
-  "영통구",
-  "성남시",
-  "분당구",
-  "수정구",
-  "중원구",
-  "진주시",
-  "창원시",
-  "마산합포구",
-  "마산회원구",
-  "함양군",
-  "포항시",
-  "경주시",
-  "구미시",
-];
-const depth3 = [
-  "낙성대동",
-  "신림동",
-  "보라매동",
-  "청담동",
-  "논현동",
-  "압구정동",
-  "문배동",
-  "원효로1동",
-  "원효로2동",
-  "영화동",
-  "파장동",
-  "연무동",
-  "평동",
-  "구온동",
-  "곡선동",
-  "영통1동",
-  "영통2동",
-  "메탄2동",
-  "서현1동",
-  "이매1동",
-  "야탄1동",
-  "고등동",
-  "단대동",
-  "신촌동",
-  "성남동",
-  "중앙동",
-  "도촌동",
-  "대평면",
-  "금석면",
-  "명석면",
-  "자산동",
-  "월영동",
-  "오동동",
-  "양덕동",
-  "석전동",
-  "함양읍",
-  "마천면",
-];
 
-const depth1_ob = {
-  서울: ["관악구", "강남구", "용산구"],
-  경기: ["수원시", "성남시"],
-  경상: ["경상남도", "경상북도"],
-  경상남도: ["진주시", "창원시", "함양군"],
-  경상북도: ["포항시", "경주시", "구미시"],
-};
-
-const depth2_ob = {
-  관악구: ["낙성대동", "신림동", "보라매동"],
-  강남구: ["청담동", "논현동", "압구정동"],
-  // ''
-};
+// const depth1 = Object.keys(depthOneOb);
+// const depth2 = Object.keys(depthTwoOb);
+// const depth3 = Object.keys(depthThreeOb);
 
 app.get("/users", function (req: Request, res: Response) {
   res.send("123");
 });
 
+// const grouping = (arr) => {};
+const checkPosIsIt = (tarName: string, childArray: string[]) => {
+  for (let i = 0, len = childArray.length; i < len; i++) {
+    if (childArray[i] === tarName) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const findParent = (tar: string, result: string[]): string[] => {
+  if (bottomUpOb[tar] === null) {
+    return result;
+  } else {
+    const nextTar = bottomUpOb[tar] as string;
+    return findParent(nextTar, [nextTar, ...result]);
+  }
+};
+
+const setResult = (startName: string, restArr: any) => {
+  if (topDownOb[startName] && topDownOb[startName].length > 0) {
+    // restArr기준으로 필터해야, 바로 값 축출 가능
+    return restArr
+      .filter((v: [string, number]) => checkPosIsIt(v[0], topDownOb[startName]))
+      .map((v: [string, number]) => {
+        return [v[0], v[1], setResult(v[0], restArr)];
+      });
+  } else {
+    return [];
+  }
+};
+
 app.get("/position", function (req: Request, res: Response) {
-  res.send("123");
+  const data: string = req.query.data as string;
+  if (data) {
+    const textArr = data.split(" ");
+    const topPosSet: Set<string> = new Set();
+    const restPosSet: Set<string> = new Set();
+    let result: any = [];
+    let exceptResult = "";
+
+    textArr.forEach((v: string) => {
+      if (bottomUpOb[v] !== undefined) {
+        const tatalPosArr = findParent(v, [v]);
+        topPosSet.add(tatalPosArr[0]);
+        tatalPosArr.slice(1).forEach((v) => {
+          restPosSet.add(v);
+        });
+      } else {
+        exceptResult += `${v}`;
+      }
+    });
+
+    // set에 각 값별 가져왔다고 생각
+    const topArr: any = [];
+    const arr: any = [];
+    let i = 0;
+    for (const string of topPosSet) {
+      i += 1;
+      topArr.push([string, i]);
+    }
+    for (const string of restPosSet) {
+      i += 1;
+      arr.push([string, i]);
+    }
+
+    // front에서 지역 위계 구조대로 출력해도 되지만, be작업만 하므로 진행
+    for (let i = 0, len = topArr.length; i < len; i++) {
+      const posName = topArr[i][0];
+      const posValue = topArr[i][1];
+      result.push([posName, posValue, setResult(posName, arr)]);
+    }
+
+    res.send(result);
+  } else {
+    res.status(400).send("error");
+  }
 });
 
 app.get("/test", function (req: Request, res: Response) {
