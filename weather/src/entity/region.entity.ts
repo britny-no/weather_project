@@ -11,11 +11,17 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
-@Entity({ name: "test" })
-export class WeatherEntity {
+@Entity({ name: "REGION" })
+export class RegionEntity {
   @PrimaryGeneratedColumn({ type: "bigint" })
-  no!: string;
+  region_index: string;
 
-  @Column({ type: "varchar", length: 1111 })
-  name: string = "none";
+  @Column({ type: "varchar", length: 50 })
+  name: string;
+
+  @Column({ type: "int" })
+  top: number;
+
+  @Column({ type: "int" })
+  fall: number;
 }
