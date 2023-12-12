@@ -2,7 +2,6 @@ import { DataSource } from "typeorm";
 
 require("dotenv").config();
 
-// import {WeatherEntity} from 'src/entity'
 const { DB_HOST, DB_PORT, DB_USER, DB_PW, DB_DB } = process.env;
 
 export const AppDataSource = new DataSource({

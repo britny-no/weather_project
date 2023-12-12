@@ -8,14 +8,22 @@ import {
   getChildRegion,
 } from "./service/region";
 
+require("dotenv").config();
+
 const app = express();
 app.use(express.json());
+
+// 가정
+// 상위 분류는 하위 분류들의 평균 값으로 도출한다
+// 지역 데이터 중복 없다고 가정
 
 //router몇개 안되서, routes 미구성
 app.get("/", function (req: Request, res: Response) {
   res.send("welcome!");
 });
 
+// 띄어쓰기를 기준으로 구분.
+// ex: '서울 창원시', '경상북도 낙성대동'
 app.get(
   "/search-region",
   regionSearchValidator,
@@ -74,4 +82,4 @@ app.get("*", function (req: Request, res: Response) {
 
 // start express server
 AppDataSource.initialize().then(() => console.log("☘️ DB Connection"));
-app.listen(3000);
+app.listen(process.env.PORT);
