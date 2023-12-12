@@ -1,14 +1,18 @@
 import { DataSource } from "typeorm";
 
+require("dotenv").config();
+
 // import {WeatherEntity} from 'src/entity'
-export const myDataSource = new DataSource({
+const { DB_HOST, DB_PORT, DB_USER, DB_PW, DB_DB } = process.env;
+
+export const AppDataSource = new DataSource({
   type: "mysql",
-  host: "appsDB",
-  port: 3306,
-  username: "root",
-  password: "helloworld",
-  database: "test",
+  host: DB_HOST,
+  port: Number(DB_PORT),
+  username: DB_USER,
+  password: DB_PW,
+  database: DB_DB,
   entities: ["src/entity/*.entity.ts"],
-  logging: true,
+  // logging: true,
   // synchronize: true,
 });

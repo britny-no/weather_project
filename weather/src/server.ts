@@ -1,7 +1,5 @@
 import express, { Request, Response } from "express";
-import { myDataSource } from "./app-data-source";
-import { topDownOb, bottomUpOb } from "./constant/ob";
-import { findParent, generateTreeBar } from "./js/index";
+import { AppDataSource } from "./app-data-source";
 import { regionSearchValidator } from "./middleware/regionSearchValidator";
 import { searchRegion } from "./service/region";
 
@@ -16,9 +14,9 @@ app.get("/", function (req: Request, res: Response) {
 app.get(
   "/search-region",
   regionSearchValidator,
-  function (req: Request, res: Response) {
+  async function (req: Request, res: Response) {
     const data: string = req.query.data as string;
-    const result = searchRegion(data);
+    const result = await searchRegion(data);
 
     res.send({
       data: result[0],
@@ -35,4 +33,5 @@ app.get("*", function (req: Request, res: Response) {
 });
 
 // start express server
+AppDataSource.initialize().then(() => console.log("☘️ DB Connection"));
 app.listen(3000);
